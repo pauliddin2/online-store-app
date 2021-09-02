@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import 'product.dart';
 
@@ -60,16 +62,34 @@ class Products with ChangeNotifier {
   //   notifyListeners();
   // }
 
-  void addProduct(Product product) {
-    final newProduct = Product(
-        title: product.title,
-        description: product.description,
-        imageUrl: product.imageUrl,
-        price: product.price,
-        id: DateTime.now().toString());
-    _items.add(newProduct);
-    // _items.insert(0, newProduct);
-    notifyListeners();
+  Future<void> addProduct(Product product) {
+    const url =
+        'https://online-store-28145-default-rtdb.firebaseio.com/products.json';
+    return http
+        .post(
+      Uri.parse(url),
+      body: json.encode({
+        'title': product.title,
+        'description': product.description,
+        'imageUrl': product.imageUrl,
+        'price': product.price,
+        'isFavorite': product.isFavorite,
+      }),
+    )
+        .then((value) {
+      final newProduct = Product(
+          title: product.title,
+          description: product.description,
+          imageUrl: product.imageUrl,
+          price: product.price,
+          id: json.decode(value.body)['name']);
+      _items.add(newProduct);
+      // _items.insert(0, newProduct);
+      notifyListeners();
+    }).catchError((error) {
+      print(error);
+      throw error;
+    });
   }
 
   List<Product> get favoriteItems {
