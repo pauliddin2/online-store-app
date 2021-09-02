@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +13,19 @@ import './screens/orders_screen.dart';
 import './screens/user_product_screens.dart';
 import '../screens/edit_product_screen.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  HttpOverrides.global = new MyHttpOverrides();
+  runApp(MyApp());
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
 
 class MyApp extends StatelessWidget {
   @override
