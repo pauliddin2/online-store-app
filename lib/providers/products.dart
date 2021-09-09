@@ -65,12 +65,25 @@ class Products with ChangeNotifier {
   Future<void> fetchAndSetProducts() async {
     const url =
         'https://online-store-28145-default-rtdb.firebaseio.com/products.json';
-    try {
-      final response = await http.get(Uri.parse(url));
-      print(json.decode(response.body));
-    } catch (error) {
-      throw (error);
-    }
+
+    final response = await http.get(Uri.parse(url));
+    final extractedData = json.decode(response.body) as Map<String, dynamic>;
+    List<Product> loaddedProducts = [];
+    extractedData.forEach((productId, productData) {
+      loaddedProducts.insert(
+          0,
+          Product(
+            id: productId,
+            title: productData['title'],
+            description: productData['description'],
+            price: productData['price'],
+            isFavorite: productData['isFavorite'],
+            imageUrl: productData['imageUrl'],
+          ));
+      loaddedProducts = _items;
+      notifyListeners();
+    });
+    print(json.decode(response.body));
   }
 
   Future<void> addProduct(Product product) {
